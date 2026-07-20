@@ -36,7 +36,7 @@ on:
 
 jobs:
   docker-test:
-    uses: mapfre-tech/brasil-maia-infra/.github/workflows/docker-test.yml@feature/teste-imagem-azr
+    #uses: mapfre-tech/brasil-maia-infra/.github/workflows/docker-test.yml@feature/teste-imagem-azr
     with:
       acr-login-server: ${{ inputs.acr-login-server }}
       keyvault-name: ${{ inputs.keyvault-name }}
