@@ -1,0 +1,47 @@
+# Copyright (c) MAPFRE DevOps Platform
+#
+# Docker Pull/Push Test Workflow (caller). Triggers when:
+#   - Manually via workflow_dispatch
+#
+# This workflow does not implement any Docker logic itself. It calls the
+# reusable pipeline centralized in brasil-maia-infra, which performs the
+# login and docker pull/push test against the ACR (Container Registry)
+# linked to the Azure Container App (ACA), using Key Vault credentials.
+#
+# Required secrets (must exist in THIS repo, or as Organization secrets
+# shared with brasil-maia-infra — see comments in
+# brasil-maia-infra/.github/workflows/docker-test.yml):
+#   - SP_CLIENT_ID
+#   - SP_CLIENT_SECRET
+#   - AZURE_TENANT_ID
+#   - AZURE_SUBSCRIPTION_ID
+
+name: Docker Pull/Push Test (via brasil-maia-infra)
+run-name: "Docker Pull/Push Test #${{ github.run_number }}"
+on:
+  push:
+    branches:
+      - teste_actions
+  workflow_dispatch:
+    inputs:
+      acr-login-server:
+        description: "Login server of the ACR linked to the Azure Container App (ACA), e.g. acrmaiabrdev.azurecr.io"
+        required: true
+        type: string
+      keyvault-name:
+        description: "Azure Key Vault holding the ACR credentials"
+        required: false
+        type: string
+        default: kv-dev-maia
+
+jobs:
+  docker-test:
+    uses: mapfre-tech/brasil-maia-infra/.github/workflows/docker-test.yml@feature/teste-imagem-azr
+    with:
+      acr-login-server: ${{ inputs.acr-login-server }}
+      keyvault-name: ${{ inputs.keyvault-name }}
+    secrets:
+      SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID }}
+      SP_CLIENT_SECRET: ${{ secrets.SP_CLIENT_SECRET }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
